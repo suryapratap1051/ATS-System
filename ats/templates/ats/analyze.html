@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analysis</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Resume Analysis and Scoring</h1>
+        <form id="resume-form" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="resume">Upload Your Resume (PDF):</label>
+            <input type="file" name="resume" id="resume" required><br>
+
+            <label for="job_description">Job Description (Optional):</label>
+            <textarea name="job_description" id="job_description" rows="5" placeholder="Paste job description here..."></textarea><br>
+
+            <label for="analysis_option">Choose Analysis Option:</label>
+            <select name="analysis_option" id="analysis_option">
+                <option value="Quick Scan">Quick Scan</option>
+                <option value="Resume Score">Resume Score</option>
+                <option value="Detailed Analysis">Detailed Analysis</option>
+                <option value="ATS Optimization">ATS Optimization</option>
+            </select><br>
+
+            <button type="submit">Analyze</button>
+        </form>
+
+        <div id="analysis-result" class="result">
+            <!-- Result will be shown here -->
+        </div>
+    </div>
+
+    <script>
+        // Handle the form submission asynchronously
+        document.getElementById('resume-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let formData = new FormData(this);
+            
+            fetch("{% url 'analyze_resume' %}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.analysis) {
+                    document.getElementById('analysis-result').innerHTML = `<h2>Analysis Result</h2><p>${data.analysis}</p>`;
+                } else if (data.error) {
+                    document.getElementById('analysis-result').innerHTML = `<p class="error">${data.error}</p>`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
